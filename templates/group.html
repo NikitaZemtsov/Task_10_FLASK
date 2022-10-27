@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {{ title }}
+{% endblock %}
+
+
+{% block content_title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <ol class="lead">
+    {% for student in students %}
+        <li>
+            <a class="lead" href="{{ url_for('students') }}/{{ student.id }}">{{ student.first_name}} {{ student.last_name }}</a>
+        </li>
+    {% endfor %}
+    </ol>
+{% endblock %}

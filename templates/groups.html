@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {{ title }}
+{% endblock %}
+
+
+{% block content_title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+        <ol class="lead">
+        {% for group in groups %}
+            <li >
+                <a class="lead" href="{{ url_for('groups') }}/{{ group.slug }}">{{ group.name }}</a>
+            </li>
+        {% endfor %}
+        </ol>
+{% endblock %}

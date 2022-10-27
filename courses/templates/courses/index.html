@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock%}
+
+{% block content_title %}
+
+    {{ title }}
+
+{% endblock%}
+
+{% block content %}
+    {% if description %}
+        {{  description }}
+    {% else %}
+        <ol>
+            {% for course in courses %}
+                <li >
+                    <a class="lead" href="{{ url_for('courses.courses_index') }}/{{ course.slug }}">{{ course.name }}</a>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+{% endblock %}
