@@ -9,25 +9,47 @@ description="The School of Information Technology prepares students for career o
 
 @app.route("/")
 def index():
-    return render_template("index.html", title=title, description=description)
+    return render_template("index.html",
+                           title=title,
+                           description=description)
 
 
 @app.route("/groups")
 def groups():
     title = "Groups"
     groups = GroupModel.query.all()
-    return render_template('groups.html', title=title, groups=groups)
+    return render_template('groups.html',
+                           title=title,
+                           groups=groups)
+
 
 @app.route("/groups/<slug>")
 def group(slug):
     group = GroupModel.query.where(GroupModel.slug == slug).first()
     title = group.name
     students = group.students
-    return render_template('group.html', title=title, students=students)
+    return render_template('group.html',
+                           title=title,
+                           students=students)
 
-@app.route("/students")
+
+@app.route("/students/")
 def students():
-    pass
+    title = "Students"
+    page = request.args.get("page")
+    per_page = 20
+    if page and page.isdigit():
+        page = int(page)
+    else:
+        page = 1
+    students = StudentModel.query
+    pages = students.paginate(page=page, per_page=per_page)
+    return render_template('students.html',
+                           title=title,
+                           students=students,
+                           pages=pages,
+                           per_page=per_page)
+
 
 @app.route("/students/<student_id>")
 def student_profile(student_id):

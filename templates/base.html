@@ -49,6 +49,14 @@
       color: #000000;
      }
 
+     .pagination a {
+      color: black;
+      }
+     .pagination a:hover:not(.active) {
+     background-color: #ddd;
+     }
+
+
     </style>
 
     <!-- Custom styles for this template -->
@@ -68,6 +76,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('groups') }}">Groups</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('students') }}">Students</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Contact</a>
