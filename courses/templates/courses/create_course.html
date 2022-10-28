@@ -1,0 +1,25 @@
+{% extends 'base.html'%}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content_title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-7">
+        <form action="{{ url_for('courses.create_course') }}" method="post">
+              {% for field in form %}
+                    <div class="form-group">
+                        {{ field.label(class='control-label') }}
+                        {{ field(class='form-control') }}
+                    </div>
+              {% endfor %}
+            <button type="submit" class="btn btn-success">Create</button>
+        </form>
+    </div>
+{% endblock %}
+
+

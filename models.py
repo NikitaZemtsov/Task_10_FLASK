@@ -1,4 +1,6 @@
 from app import db
+from slugify import slugify
+
 
 
 class GroupModel(db.Model):
@@ -31,3 +33,7 @@ class CourseModel(db.Model):
     description = db.Column(db.Text(), nullable=False)
     students = db.relationship('StudentModel', secondary=students_courses, backref="courses")
 
+    def __init__(self, *args, **kwargs):
+        super(CourseModel, self).__init__(*args, **kwargs)
+        if self.name:
+            self.slug = slugify(self.name)
