@@ -10,10 +10,10 @@
 {% endblock %}
 
 {% block content %}
-        <ol class="lead" start="{% if pages.page==1 %} {{ 1 }} {% else %} {{ ((pages.page - 1) * per_page)+1 }} {% endif %}">
+        <ol class="lead" start="{{ pages.first }}">
             {% for student in pages.items %}
                 <li>
-                    <a class="lead" href="{{ url_for('students') }}/{{ student.id }}">{{ student.first_name }} {{ student.last_name }}</a>
+                    <a class="lead" href="{{ url_for('student_profile', student_id=student.id) }}">{{ student.first_name }} {{ student.last_name }}</a>
                 </li>
             {% endfor %}
         </ol>
