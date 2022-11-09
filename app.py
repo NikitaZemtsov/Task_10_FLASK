@@ -6,6 +6,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_bcrypt import Bcrypt
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+from flask_login import LoginManager
 
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
+login_manager = LoginManager(app)
 
 from courses.blueprint import courses
 app.register_blueprint(courses, url_prefix="/courses")

@@ -18,14 +18,13 @@ class RegistrationForm(FlaskForm):
                                      validators=[DataRequired(), EqualTo("password")])
     submit = SubmitField('Sign Up')
 
-    def validate_email(self, field):
-        if UserModel.query.filter_by(email=field.data).first():
+    def validate_email(self, email):
+        if UserModel.query.filter_by(email=email.data).first():
             raise ValidationError('User with this email is already registered!')
 
-    def validate_username(self, field):
-        if UserModel.query.filter_by(username=field.data).first():
+    def validate_username(self, username):
+        if UserModel.query.filter_by(username=username.data).first():
             raise ValidationError('Username already taken!')
-
 
 
 class LoginForm(FlaskForm):

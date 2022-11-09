@@ -2,11 +2,11 @@ from flask_bcrypt import check_password_hash
 
 from app import app
 from flask import request, render_template, flash, redirect, url_for
-from models import GroupModel, StudentModel, CourseModel, UserModel
+from models import GroupModel, StudentModel, UserModel
 from flask import request
 from forms import RegistrationForm, LoginForm
 from app import db
-from sqlalchemy.exc import IntegrityError
+from flask_login import login_user, current_user, logout_user
 
 title = "IT_school"
 description="The School of Information Technology prepares students for career opportunities in cybersecurity, information systems, and other I.T. fields through accelerated I.T. degree programs. Multiple industry certifications are included in every information technology degree program, and many are covered by tuition. Cybersecurity and information technology industry employers look at certifications such as CompTIA Security+ and Network+ alongside degrees. When you graduate from IT_school with an I.T. or Cybersecurity degree, you can be confident that you have the education that employers are looking for."
@@ -21,6 +21,8 @@ def index():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
     form = RegistrationForm()
     if form.validate_on_submit():
         new_user = UserModel(username=form.username.data,
@@ -32,21 +34,24 @@ def register():
         except:
             flash("Oops! We have some problem with our server! Please try later!", 'danger')
             return render_template('register.html', title='Register', form=form)
-        flash(f"Account created for {form.username.data}!", "success")
-        return redirect(url_for("index"))
+        flash(f"You account has been created! You are now able to log in!", "success")
+        return redirect(url_for("login"))
     return render_template('register.html', title='Register', form=form)
 
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
     form = LoginForm()
     if form.validate_on_submit():
         try:
-            user = UserModel.query.where(UserModel.email == form.email.data).first()
+            user = UserModel.query.filter_by(email=form.email.data).first()
         except:
             flash(f"Ops! We have some problem with server", "danger")
             return render_template('login.html', title='Log In', form=form)
         if user and check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
             flash(f"You have been logged in!", "success")
             return redirect(url_for("admin.index"))
         else:
@@ -98,5 +103,12 @@ def student_profile(student_id):
                            title="{} {}".format(student.first_name, student.last_name),
                            group=student.group,
                            courses=student.courses)
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
+@app.route("/account")
+def account():
 
+    return render_template('account.html', title='Account', username=current_user.username)

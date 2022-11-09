@@ -1,9 +1,14 @@
-from app import db
+from app import db, login_manager
 from slugify import slugify
 from flask_security import RoleMixin, UserMixin
 from datetime import datetime
 from app import bcrypt
+from flask_login import UserMixin
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return UserModel.query.get(int(user_id))
 
 
 class GroupModel(db.Model):
