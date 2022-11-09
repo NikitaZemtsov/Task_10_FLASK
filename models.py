@@ -1,5 +1,8 @@
 from app import db
 from slugify import slugify
+from flask_security import RoleMixin, UserMixin
+from datetime import datetime
+from app import bcrypt
 
 
 
@@ -24,6 +27,9 @@ class StudentModel(db.Model):
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
 
+    def __repr__(self):
+        return "{id}_{f_n}_{l_n}".format(id=self.id, f_n=self.first_name, l_n=self.last_name)
+
 
 class CourseModel(db.Model):
     __tablename__ = "courses"
@@ -37,3 +43,36 @@ class CourseModel(db.Model):
         super(CourseModel, self).__init__(*args, **kwargs)
         if self.name:
             self.slug = slugify(self.name)
+
+
+users_roles = db.Table("users_roles",
+                       db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
+                       db.Column("role_id", db.Integer, db.ForeignKey("roles.id")))
+
+
+class UserModel(db.Model, UserMixin):
+    __tablename__ = "users"
+    id = db.Column(db.Integer(), primary_key=True)
+    username = db.Column(db.String(255), unique=True, nullable=False)
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    activate = db.Column(db.Boolean())
+    registration = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
+    role = db.relationship('RoleModel', secondary=users_roles, backref="user")
+
+    def __init__(self, *args, **kwargs):
+        super(UserModel, self).__init__(*args, **kwargs)
+        self.password = bcrypt.generate_password_hash(self.password).decode("utf-8")
+
+
+class RoleModel(db.Model, RoleMixin):
+    __tablename__ = "roles"
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.String(255))
+
+
+
+
+
+
