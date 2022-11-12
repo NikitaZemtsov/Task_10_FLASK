@@ -58,7 +58,11 @@ users_roles = db.Table("users_roles",
 class UserModel(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer(), primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"))
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(255), unique=True, nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default="default.jpg")
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     activate = db.Column(db.Boolean())

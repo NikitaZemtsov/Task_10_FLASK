@@ -16,6 +16,7 @@ bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 csrf = CSRFProtect(app)
 login_manager = LoginManager(app)
+login_manager.login_view = "login"
 
 from courses.blueprint import courses
 app.register_blueprint(courses, url_prefix="/courses")
@@ -28,3 +29,8 @@ admin.add_view(ModelView(StudentModel, db.session))
 admin.add_view(ModelView(UserModel, db.session))
 admin.add_view(ModelView(CourseModel, db.session))
 admin.add_view(ModelView(RoleModel, db.session))
+
+
+
+
+
