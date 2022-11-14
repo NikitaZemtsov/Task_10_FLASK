@@ -73,6 +73,9 @@ class UserModel(db.Model, UserMixin):
         super(UserModel, self).__init__(*args, **kwargs)
         self.password = bcrypt.generate_password_hash(self.password).decode("utf-8")
 
+    def __repr__(self):
+        return "{id}_{f_n}_{l_n}".format(id=self.id, f_n=self.first_name, l_n=self.last_name)
+
 
 class RoleModel(db.Model, RoleMixin):
     __tablename__ = "roles"

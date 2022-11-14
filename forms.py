@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from app import app
 from models import UserModel
@@ -66,3 +66,8 @@ class UpdateAccountForm(FlaskForm):
         if current_user.username != username.data:
             UserModel.query.filter_by(username=username.data).first()
             raise ValidationError('Username already taken!')
+
+
+class CourseForm(FlaskForm):
+    name = StringField("Name")
+    description = TextAreaField("Description")
