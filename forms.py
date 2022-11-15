@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from app import app
 from models import UserModel
@@ -54,7 +54,10 @@ class UpdateAccountForm(FlaskForm):
     email = StringField("Email",
                         validators=[DataRequired(),
                                     Email(granular_message=True, check_deliverability=True)])
-    picture = FileField("Update Profile Picture", validators=[FileAllowed(["jpg", "png"])])
+    role = SelectField('Role', coerce=int, choices=[], validate_choice=False)
+
+    picture = FileField("Update Profile Picture",
+                        validators=[FileAllowed(["jpg", "png"])])
     submit = SubmitField('Update')
 
     def validate_email(self, email):
@@ -68,6 +71,11 @@ class UpdateAccountForm(FlaskForm):
             raise ValidationError('Username already taken!')
 
 
-class CourseForm(FlaskForm):
+class CreateCourseForm(FlaskForm):
     name = StringField("Name")
     description = TextAreaField("Description")
+    submit = SubmitField('Create')
+
+
+
+

@@ -22,12 +22,13 @@ Principal(app)
 login_manager.login_view = "login"
 
 
-from models import GroupModel, StudentModel, CourseModel, UserModel, db
+from models import GroupModel, StudentModel, CourseModel, UserModel, db, courses_mentors
 admin = Admin(app)
 admin.add_view(ModelView(GroupModel, db.session))
 admin.add_view(ModelView(StudentModel, db.session))
 admin.add_view(ModelView(UserModel, db.session))
 admin.add_view(ModelView(CourseModel, db.session))
+
 
 
 

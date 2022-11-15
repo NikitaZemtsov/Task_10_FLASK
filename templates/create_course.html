@@ -9,18 +9,50 @@
 {% endblock %}
 
 {% block content %}
+
+    {% if course %}
+
+        {% set action=url_for('update_course', course_slug=course.slug) %}
+
+    {% else %}
+
+        {% set action=url_for('create_course') %}
+
+    {% endif %}
+
 <div class="col-md-7" xmlns="http://www.w3.org/1999/html">
-        <form action="{{ url_for('create_course') }}" method="post">
-              {% for field in form %}
-                    <div class="form-group">
-                        {{ field.label(class='control-label') }}
-                        {{ field(class='form-control') }}
-                    </div>
-              {% endfor %}
-             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-            <button type="submit" class="btn btn-success">Create</button>
+        <form action="{{ action }}" method="POST">
+             <div class="form-group">
+                {{ form.name.label() }}
+                {{ form.name(class="form-control-file") }}
+                 {% if form.name.errors: %}
+                    {% for error in form.name.errors %}
+                    <span class="text-danger">{{ error }}</span></br>
+                    {% endfor %}
+                 {% endif %}
+             </div>
+             <div class="form-group">
+                {{ form.description.label() }}
+                {{ form.description(class="form-control-file") }}
+                 {% if form.description.errors: %}
+                    {% for error in form.description.errors %}
+                    <span class="text-danger">{{ error }}</span></br>
+                    {% endfor %}
+                 {% endif %}
+             </div>
+             <div class="form-group">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {% if course %}
+
+                        <button type="submit" class="btn btn-outline-info">Update</button>
+
+                    {% else %}
+
+                        <button type="submit" class="btn btn-outline-info">Create</button>
+             </div>
+            {% endif %}
         </form>
-    </div>
+</div>
 {% endblock %}
 
 

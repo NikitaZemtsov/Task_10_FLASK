@@ -36,6 +36,11 @@ class StudentModel(db.Model):
         return "{id}_{f_n}_{l_n}".format(id=self.id, f_n=self.first_name, l_n=self.last_name)
 
 
+courses_mentors = db.Table("courses_mentors",
+                       db.Column("mentor_id", db.Integer, db.ForeignKey("users.id")),
+                       db.Column("course_id", db.Integer, db.ForeignKey("courses.id")))
+
+
 class CourseModel(db.Model):
     __tablename__ = "courses"
     id = db.Column(db.Integer(), primary_key=True)
@@ -43,11 +48,13 @@ class CourseModel(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text(), nullable=False)
     students = db.relationship('StudentModel', secondary=students_courses, backref="courses")
+    mentors = db.relationship('UserModel', secondary=courses_mentors, backref="courses")
 
     def __init__(self, *args, **kwargs):
         super(CourseModel, self).__init__(*args, **kwargs)
         if self.name:
             self.slug = slugify(self.name)
+
 
 
 users_roles = db.Table("users_roles",
@@ -67,7 +74,7 @@ class UserModel(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=False)
     activate = db.Column(db.Boolean())
     registration = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow)
-    role = db.relationship('RoleModel', secondary=users_roles, backref="user")
+    role = db.relationship('RoleModel', secondary=users_roles, backref="user", lazy=True)
 
     def __init__(self, *args, **kwargs):
         super(UserModel, self).__init__(*args, **kwargs)
