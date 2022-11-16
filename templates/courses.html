@@ -14,7 +14,7 @@
     {% if description %}
 
             {{  description }}
-            {% if access.can() %}
+            {% if current_user.mentor_access %}
                 <form action="{{ url_for('update_course', course_slug=course.slug) }}">
                     <button class="btn btn-success">Edit</button>
                 </form>
@@ -29,7 +29,7 @@
                     </li>
                 {% endfor %}
             </ol>
-            {% if access.can() %}
+            {% if current_user.mentor_access %}
                 <form action="{{ url_for('create_course') }}" method="get">
                     <button class="btn btn-success">Add course</button>
                 </form>

@@ -1,55 +1,45 @@
-from collections import namedtuple
-
-from flask_bcrypt import check_password_hash
-import secrets
 import os
 from PIL import Image
-from flask_principal import Permission, identity_loaded, identity_changed, UserNeed, RoleNeed, Identity, \
-    AnonymousIdentity
-# from pytz import unicode
-
-from app import app
-from flask import request, render_template, flash, redirect, url_for, session
-
-from models import GroupModel, StudentModel, UserModel, RoleModel, CourseModel
-from flask import request
-from forms import RegistrationForm, LoginForm, UpdateAccountForm, CreateCourseForm
-from app import db
+import secrets
+from flask_bcrypt import check_password_hash
+from flask import request, render_template, flash, redirect, url_for, session, g
+from flask_principal import identity_loaded, identity_changed, UserNeed, RoleNeed, Identity, AnonymousIdentity
 from flask_login import login_user, current_user, logout_user, login_required
-from functools import wraps, partial
+
+from app import app, db
+from models import GroupModel, StudentModel, UserModel, RoleModel, CourseModel, admin, mentor, student
+from forms import RegistrationForm, LoginForm, UpdateAccountForm, CreateCourseForm
+
+
 
 title = "IT_school"
 description="The School of Information Technology prepares students for career opportunities in cybersecurity, information systems, and other I.T. fields through accelerated I.T. degree programs. Multiple industry certifications are included in every information technology degree program, and many are covered by tuition. Cybersecurity and information technology industry employers look at certifications such as CompTIA Security+ and Network+ alongside degrees. When you graduate from IT_school with an I.T. or Cybersecurity degree, you can be confident that you have the education that employers are looking for."
-
-admin = Permission(RoleNeed('admin'))
-mentor = Permission(RoleNeed('mentor'))
-student = Permission(RoleNeed('student'))
 
 
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
     # Set the identity user object
-        identity.user = current_user
-        # Add the UserNeed to the identity
-        if hasattr(current_user, 'id'):
-            identity.provides.add(UserNeed(current_user.id))
+    identity.user = current_user
+    # Add the UserNeed to the identity
+    if hasattr(current_user, 'id'):
+        identity.provides.add(UserNeed(current_user.id))
 
-        role = getattr(current_user, 'role', [])
-        print(role)
-        needs = []
-        if current_user.is_authenticated:
-            if role[0].name in ('student', "mentor", "admin"):
-                needs.append(RoleNeed('student'))
-            if role[0].name in ("mentor", "admin"):
-                needs.append(RoleNeed('mentor'))
-            if role[0].name == "admin":
-                needs.append(RoleNeed('admin'))
+    role = getattr(current_user, 'role', [])
+    needs = []
+    if current_user.is_authenticated:
+        if role[0].name in ('student', "mentor", "admin"):
+            needs.append(RoleNeed('student'))
+        if role[0].name in ("mentor", "admin"):
+            needs.append(RoleNeed('mentor'))
+        if role[0].name == "admin":
+            needs.append(RoleNeed('admin'))
 
-        if hasattr(current_user, 'role'):
-            for need in needs:
-                identity.provides.add(need)
+    if hasattr(current_user, 'role'):
+        for need in needs:
+            identity.provides.add(need)
 
-
+# Заготовка под точечный доступ к редактированию курсов менторами. Менторы смогут редактировать только те курсы,
+# к которым у них есть доступ.
 # CoursesNeed = namedtuple('courses', ['method', 'value'])
 # EditCoursesNeed = partial(CoursesNeed, 'edit')
 
@@ -80,9 +70,9 @@ def on_identity_loaded(sender, identity):
 #             identity.provides.add(EditCoursesNeed(unicode(course.id)))
 
 
-
 @app.route("/")
 def index():
+    print(g.identity.can(mentor))
     return render_template("index.html",
                            title=title,
                            description=description)
@@ -135,6 +125,7 @@ def login():
             flash(f"Log in Unsuccessful. Please check email and password", "danger")
     return render_template('login.html', title='Log In', form=form)
 
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -152,7 +143,7 @@ def logout():
 
 
 @app.route("/groups")
-@login_required
+@mentor.require(403)
 def groups():
     title = "Groups"
     groups = GroupModel.query.all()
@@ -162,7 +153,6 @@ def groups():
 
 
 @app.route("/groups/<slug>")
-@login_required
 def group(slug):
     group = GroupModel.query.where(GroupModel.slug == slug).first()
     title = group.name
@@ -173,7 +163,7 @@ def group(slug):
 
 
 @app.route("/students/")
-@login_required
+@mentor.require(403)
 def students():
     title = "Students"
     page = request.args.get("page")
@@ -192,16 +182,13 @@ def students():
 
 
 @app.route("/students/<student_id>")
-@login_required
+@mentor.require(403)
 def student_profile(student_id):
     student = StudentModel.query.where(StudentModel.id == student_id).first()
     return render_template('student.html',
                            title="{} {}".format(student.first_name, student.last_name),
                            group=student.group,
                            courses=student.courses)
-
-
-
 
 
 def save_picture(form_picture) -> str:
@@ -266,10 +253,7 @@ def correct_representetion_list(roles, current_role):
             roles.pop(i)
         i+=1
     roles.insert(0, current_role[0])
-    print(roles)
     return roles
-
-
 
 
 @app.route('/courses/create', methods=["POST", "GET"])
@@ -324,7 +308,7 @@ def update_course(course_slug=None):
 def courses_index():
     title = "Courses"
     courses_list = CourseModel.query.all()
-    return render_template('courses.html', title=title, courses=courses_list, description=False, access=mentor)
+    return render_template('courses.html', title=title, courses=courses_list, description=False)
 
 
 @app.route('/courses/description/<course_slug>')
@@ -332,7 +316,7 @@ def courses_description(course_slug):
     course = CourseModel.query.where(CourseModel.slug == course_slug).first()
     title = course.name
     description = course.description
-    return render_template('courses.html', title=title, description=description, course=course, access=mentor)
+    return render_template('courses.html', title=title, description=description, course=course)
 
 
 

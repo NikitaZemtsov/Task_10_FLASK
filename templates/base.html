@@ -74,7 +74,7 @@
           <li class="nav-item active">
             <a class="nav-link" href="{{ url_for('courses_index') }}">Courses<span class="sr-only">(current)</span></a>
           </li>
-            {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated and current_user.mentor_access %}
               <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('groups') }}">Groups</a>
               </li>

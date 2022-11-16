@@ -1,14 +1,20 @@
 from app import db, login_manager
 from slugify import slugify
-from flask_security import RoleMixin, UserMixin
 from datetime import datetime
 from app import bcrypt
 from flask_login import UserMixin
+from flask_principal import Permission, RoleNeed
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return UserModel.query.get(int(user_id))
+
+# Перенес инициализацию Permission с view для корректного импорта.
+# Для добавления метода mentor_access в current_user.
+admin = Permission(RoleNeed('admin'))
+mentor = Permission(RoleNeed('mentor'))
+student = Permission(RoleNeed('student'))
 
 
 class GroupModel(db.Model):
@@ -56,7 +62,6 @@ class CourseModel(db.Model):
             self.slug = slugify(self.name)
 
 
-
 users_roles = db.Table("users_roles",
                        db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
                        db.Column("role_id", db.Integer, db.ForeignKey("roles.id")))
@@ -83,8 +88,14 @@ class UserModel(db.Model, UserMixin):
     def __repr__(self):
         return "{id}_{f_n}_{l_n}".format(id=self.id, f_n=self.first_name, l_n=self.last_name)
 
+    # Реализовал для динамического отображения вкладок на base.html в зависимости от роли юзера.
+    # Чтобы не пробрасывать лишнюю переменную mentor в каждую вьюху
+    @property
+    def mentor_access(self):
+        return mentor.can()
 
-class RoleModel(db.Model, RoleMixin):
+
+class RoleModel(db.Model):
     __tablename__ = "roles"
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
