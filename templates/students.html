@@ -10,40 +10,65 @@
 {% endblock %}
 
 {% block content %}
-        <ol class="lead" start="{{ pages.first }}">
-            {% for student in pages.items %}
-                <li>
-                    <a class="lead" href="{{ url_for('student_profile', student_id=student.id) }}">{{ student.first_name }} {{ student.last_name }}</a>
-                </li>
-            {% endfor %}
-        </ol>
-        <nav>
-            <ul class="pagination">
-               <li
-                   {% if not pages.has_prev %}
-                        class="page-item disabled"
-                   {% else %}
-                        class="page-item"
-                   {% endif %}>
-                   <a class="page-link" class="page-link" href="./?page={{ pages.prev_num }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
-               </li>
-               {% for page in pages.iter_pages(left_edge=2, left_current=1, right_current=1, right_edge=2) %}
-                   <li {% if page == pages.page %} class="page-item active" {% else %} class="page-item" {% endif %}>
-                       {% if page %}
-                            <a class="page-link" href="./?page={{ page }}">{{ page }}<span class="sr-only">(current)</span></a>
-                       {% else %}
-                            <a class="page-link">{{ "..." }}<span class="sr-only">(current)</span></a>
-                       {% endif %}
-                   </li>
-                {% endfor %}
-               <li
-                   {% if not pages.has_next %}
-                        class="page-item disabled"
-                   {% else %}
-                        class="page-item"
-                   {% endif %}>
-                   <a class="page-link" href="./?page={{ pages.next_num }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
-               </li>
-            </ul>
-        </nav>
+            <div class="d-flex gap-5  justify-content">
+                <div class="dropdown-menu d-block position-static pt-0 mx-0 rounded-3 shadow overflow-hidden w-280px">
+                        <ul class="list-unstyled mb-0">
+                            {% for c in courses %}
+                                  <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('students', course=c.slug) }}">
+                                        {{ c.name }}
+                                    </a>
+                                  </li>
+                            {% endfor %}
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{{ url_for('students') }}">All students</a>
+                            </li>
+                        </ul>
+                </div>
+            </div>
+            <p>
+
+            </p>
+            <div class="pb-3 mb-0 small lh-sm border-bottom">
+                <ol class="lead">
+                    {% for student in students %}
+                        <li>
+                            <a class="lead" href="{{ url_for('student_profile', student_id=student.id) }}">
+                                {{ student.first_name }} {{ student.last_name }}</a>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>
 {% endblock %}
+
+<p class="pb-3 mb-0 small lh-sm border-bottom">
+        <strong class="d-block text-gray-dark">@username</strong>
+        Some representative placeholder content, with some information about this user. Imagine this being some sort of status update, perhaps?
+      </p>
+<a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#">
+        <span class="d-inline-block bg-success rounded-circle p-1"></span>
+        Action
+      </a>
+<div class="dropdown-menu d-block position-static pt-0 mx-0 rounded-3 shadow overflow-hidden w-280px">
+    <form class="p-2 mb-2 bg-light border-bottom">
+      <input type="search" class="form-control" autocomplete="false" placeholder="Type to filter...">
+    </form>
+    <ul class="list-unstyled mb-0">
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#">
+        <span class="d-inline-block bg-success rounded-circle p-1"></span>
+        Action
+      </a></li>
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#">
+        <span class="d-inline-block bg-primary rounded-circle p-1"></span>
+        Another action
+      </a></li>
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#">
+        <span class="d-inline-block bg-danger rounded-circle p-1"></span>
+        Something else here
+      </a></li>
+      <li><a class="dropdown-item d-flex align-items-center gap-2 py-2" href="#">
+        <span class="d-inline-block bg-info rounded-circle p-1"></span>
+        Separated link
+      </a></li>
+    </ul>
+  </div>

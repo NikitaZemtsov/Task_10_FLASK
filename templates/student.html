@@ -18,7 +18,7 @@
         <ol class="lead">
             {% for course in courses %}
             <li >
-                <a class="lead" href="{{ url_for('courses.courses_index') }}/{{ course.slug }}">{{ course.name }} </a>
+                <a class="lead" href="{{ url_for('courses_index') }}/{{ course.slug }}">{{ course.name }} </a>
             </li>
             {% endfor %}
         </ol>

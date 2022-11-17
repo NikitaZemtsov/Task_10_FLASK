@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock%}
+
+{% block content_title %}
+
+    {{ title }}
+
+{% endblock%}
+
+{% block content %}
+            {{  description }}
+            {% if current_user.mentor_access and course in current_user.courses_edit %}
+                <form action="{{ url_for('update_course', course_slug=course.slug) }}">
+                    <button class="btn btn-success">Edit</button>
+                </form>
+            {% endif %}
+
+{% endblock %}

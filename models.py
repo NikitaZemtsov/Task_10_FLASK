@@ -4,6 +4,7 @@ from datetime import datetime
 from app import bcrypt
 from flask_login import UserMixin
 from flask_principal import Permission, RoleNeed
+from flask_login import current_user
 
 
 @login_manager.user_loader
@@ -23,28 +24,20 @@ class GroupModel(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     slug = db.Column(db.String(255), nullable=False)
-    students = db.relationship('StudentModel', backref="group")
+    students = db.relationship('UserModel', backref="group")
+
+    def __repr__(self):
+        return "{name}".format(name=self.name)
 
 
-students_courses = db.Table("students_courses",
-                            db.Column("student_id", db.Integer, db.ForeignKey("students.id")),
+user_courses = db.Table("user_courses",
+                            db.Column("user_id", db.Integer, db.ForeignKey("users.id")),
                             db.Column("course_id", db.Integer, db.ForeignKey("courses.id")))
 
 
-class StudentModel(db.Model):
-    __tablename__ = "students"
-    id = db.Column(db.Integer(), primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"))
-    first_name = db.Column(db.String(255), nullable=False)
-    last_name = db.Column(db.String(255), nullable=False)
-
-    def __repr__(self):
-        return "{id}_{f_n}_{l_n}".format(id=self.id, f_n=self.first_name, l_n=self.last_name)
-
-
 courses_mentors = db.Table("courses_mentors",
-                       db.Column("mentor_id", db.Integer, db.ForeignKey("users.id")),
-                       db.Column("course_id", db.Integer, db.ForeignKey("courses.id")))
+                           db.Column("mentor_id", db.Integer, db.ForeignKey("users.id")),
+                           db.Column("course_id", db.Integer, db.ForeignKey("courses.id")))
 
 
 class CourseModel(db.Model):
@@ -53,13 +46,16 @@ class CourseModel(db.Model):
     slug = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text(), nullable=False)
-    students = db.relationship('StudentModel', secondary=students_courses, backref="courses")
-    mentors = db.relationship('UserModel', secondary=courses_mentors, backref="courses")
+    students = db.relationship('UserModel', secondary=user_courses, backref="courses_view")
+    mentors = db.relationship('UserModel', secondary=courses_mentors, backref="courses_edit")
 
     def __init__(self, *args, **kwargs):
         super(CourseModel, self).__init__(*args, **kwargs)
         if self.name:
             self.slug = slugify(self.name)
+
+    def __repr__(self):
+        return "{name}".format(name=self.name)
 
 
 users_roles = db.Table("users_roles",
@@ -95,11 +91,20 @@ class UserModel(db.Model, UserMixin):
         return mentor.can()
 
 
+   # Отображение и редактирование полей доступных только для админа
+    @property
+    def admin_access(self):
+        return mentor.can()
+
+
 class RoleModel(db.Model):
     __tablename__ = "roles"
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.String(255))
+
+    def __repr__(self):
+        return "{name}".format(name=self.name)
 
 
 

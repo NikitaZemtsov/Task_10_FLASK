@@ -11,17 +11,6 @@
 {% endblock%}
 
 {% block content %}
-    {% if description %}
-
-            {{  description }}
-            {% if current_user.mentor_access %}
-                <form action="{{ url_for('update_course', course_slug=course.slug) }}">
-                    <button class="btn btn-success">Edit</button>
-                </form>
-            {% endif %}
-
-    {% else %}
-
             <ol>
                 {% for course in courses %}
                     <li >
@@ -34,6 +23,5 @@
                     <button class="btn btn-success">Add course</button>
                 </form>
             {% endif %}
-    {% endif %}
 
 {% endblock %}

@@ -1,4 +1,5 @@
 import os
+
 from PIL import Image
 import secrets
 from flask_bcrypt import check_password_hash
@@ -7,7 +8,7 @@ from flask_principal import identity_loaded, identity_changed, UserNeed, RoleNee
 from flask_login import login_user, current_user, logout_user, login_required
 
 from app import app, db
-from models import GroupModel, StudentModel, UserModel, RoleModel, CourseModel, admin, mentor, student
+from models import GroupModel, UserModel, RoleModel, CourseModel, admin, mentor, student
 from forms import RegistrationForm, LoginForm, UpdateAccountForm, CreateCourseForm
 
 
@@ -163,32 +164,40 @@ def group(slug):
 
 
 @app.route("/students/")
+@app.route("/students/<course>")
 @mentor.require(403)
-def students():
+def students(course=None):
     title = "Students"
-    page = request.args.get("page")
-    per_page = 20
-    if page and page.isdigit():
-        page = int(page)
+    print(course)
+    courses = current_user.courses_edit
+    if course and course in [c.slug for c in courses]:
+        students = CourseModel.query.filter_by(slug=course).first().students
+        print(students)
+        return render_template('students.html',
+                               title=title,
+                               students=students,
+                               courses=courses)
     else:
-        page = 1
-    students = StudentModel.query
-    pages = students.paginate(page=page, per_page=per_page)
-    return render_template('students.html',
-                           title=title,
-                           students=students,
-                           pages=pages,
-                           per_page=per_page)
+        all_students = []
+        for c in courses:
+            students = c.students
+            for student in students:
+                if student not in all_students:
+                    all_students.append(student)
+        return render_template('students.html',
+                               title=title,
+                               students=all_students,
+                               courses=courses)
 
 
-@app.route("/students/<student_id>")
+@app.route("/students/<int:student_id>")
 @mentor.require(403)
 def student_profile(student_id):
-    student = StudentModel.query.where(StudentModel.id == student_id).first()
+    student = UserModel.query.filter_by(id=int(student_id)).first()
     return render_template('student.html',
                            title="{} {}".format(student.first_name, student.last_name),
                            group=student.group,
-                           courses=student.courses)
+                           courses=student.courses_view)
 
 
 def save_picture(form_picture) -> str:
@@ -240,20 +249,8 @@ def account():
         form.last_name.data = current_user.last_name
         form.email.data = current_user.email
         form.username.data = current_user.username
-        roles = correct_representetion_list(RoleModel.query.all(), current_user.role)
-        form.role.choices = [(role.id, role.name) for role in roles]
     profile_img = url_for("static", filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', profile_img=profile_img, form=form, admin=admin)
-
-
-def correct_representetion_list(roles, current_role):
-    i = 0
-    for role in roles:
-        if role.id == current_role[0].id:
-            roles.pop(i)
-        i+=1
-    roles.insert(0, current_role[0])
-    return roles
 
 
 @app.route('/courses/create', methods=["POST", "GET"])
@@ -267,8 +264,8 @@ def create_course():
         name = request.form.get("name")
         description = request.form.get("description")
         course = CourseModel(name=name, description=description)
+        current_user.courses_edit.append(course)
         flash("Success! Course created!", 'success')
-
     try:
         db.session.add(course)
         db.session.commit()
@@ -316,7 +313,7 @@ def courses_description(course_slug):
     course = CourseModel.query.where(CourseModel.slug == course_slug).first()
     title = course.name
     description = course.description
-    return render_template('courses.html', title=title, description=description, course=course)
+    return render_template('course.html', title=title, description=description, course=course)
 
 
 

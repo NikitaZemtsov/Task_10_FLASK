@@ -17,7 +17,7 @@ class RegistrationForm(FlaskForm):
                            validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField("Email",
                         validators=[DataRequired(),
-                                    Email(granular_message=True, check_deliverability=True)])
+                                    Email(granular_message=True)])
     password = PasswordField("Password",
                              validators=[DataRequired(),
                                          Length(min=6, max=12, message="Password lenght should be from 6 to 12")])
